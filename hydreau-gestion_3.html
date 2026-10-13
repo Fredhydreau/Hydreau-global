@@ -93,9 +93,34 @@ input,select{width:100%;font:inherit;padding:10px 12px;border:1px solid var(--li
 .kpi.bad b{color:var(--bad)}
 .kpi .s{font-size:12.5px;color:var(--mute);white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
 
-.cols{display:grid;grid-template-columns:minmax(0,1.65fr) minmax(300px,1fr);grid-template-areas:"wk todo" "wk rap";gap:14px;align-items:start}
-.a-wk{grid-area:wk}.a-todo{grid-area:todo}.a-rap{grid-area:rap}
-@media (max-width:980px){.cols{grid-template-columns:1fr;grid-template-areas:"todo" "wk" "rap"}}
+.cols{display:grid;grid-template-columns:minmax(0,1.65fr) minmax(300px,1fr);gap:14px;align-items:start}
+.colL,.colR{display:flex;flex-direction:column;gap:14px;min-width:0}
+@media (max-width:980px){.cols{grid-template-columns:minmax(0,1fr)}.colL,.colR{display:contents}.a-todo{order:1}.a-wk{order:2}.a-ap{order:3}.a-rap{order:4}}
+.brief{margin-top:8px;font-size:14.5px;color:var(--ink);display:flex;flex-wrap:wrap;gap:6px 8px}
+.brief span{background:var(--panel);border:1px solid var(--line);border-radius:20px;padding:3px 10px;white-space:nowrap}
+.brief span b{font-weight:700}
+.brief span.bad{border-color:color-mix(in srgb,var(--bad) 40%,var(--line));color:var(--bad)}
+.act{display:grid;grid-template-columns:repeat(4,minmax(0,1fr));background:var(--panel);border:1px solid var(--line);border-radius:12px;margin:-4px 0 16px}
+.act>div{padding:12px 16px;border-left:1px solid var(--line);min-width:0}
+.act>div:first-child{border-left:0}
+.act .l{font-size:11.5px;font-weight:700;color:var(--mute);text-transform:uppercase;letter-spacing:.04em}
+.act b{display:block;font-size:20px;line-height:1.3;font-variant-numeric:tabular-nums}
+.act .s{font-size:12.5px;color:var(--mute)}
+.bar2{height:6px;border-radius:3px;background:var(--line);margin-top:6px;overflow:hidden}
+.bar2 i{display:block;height:100%;background:var(--teal);border-radius:3px}
+@media (max-width:760px){.act{grid-template-columns:1fr 1fr}.act>div:nth-child(3){border-left:0}.act>div:nth-child(n+3){border-top:1px solid var(--line)}}
+.ap{display:grid;grid-template-columns:1fr 1fr;gap:4px 18px;padding:0 16px 14px}
+.ap h3{margin:0 0 6px;font-size:12px;font-weight:700;color:var(--mute);text-transform:uppercase;letter-spacing:.04em;display:flex;gap:6px;align-items:center}
+.ap h3 .c{background:var(--bg);border:1px solid var(--line);border-radius:10px;padding:0 7px;font-size:11.5px;color:var(--ink)}
+.chips{display:flex;flex-wrap:wrap;gap:6px}
+.chip{border:1px solid var(--line);background:var(--bg);color:var(--ink);border-radius:8px;padding:4px 9px;font-size:13px;text-align:left;max-width:100%}
+.chip small{color:var(--mute);margin-left:4px}
+.chip:hover{border-color:var(--teal)}
+.chip.more{color:var(--teal);font-weight:600;background:transparent}
+@media (max-width:600px){.ap{grid-template-columns:1fr;gap:14px}}
+.wx{display:block;font-weight:600;text-transform:none;letter-spacing:0;color:var(--ink);font-size:12px;margin-top:2px;white-space:nowrap}
+.wx small{color:var(--blue);font-weight:600}
+.wk-days .wx{display:inline;margin-left:4px}
 
 .card{background:var(--panel);border:1px solid var(--line);border-radius:12px;min-width:0}
 .card>header{display:flex;align-items:center;gap:8px;padding:14px 16px 10px;flex-wrap:wrap}
@@ -161,6 +186,87 @@ button.cell:hover{background:color-mix(in srgb,var(--c) 18%,var(--panel))}
 .rap-add input{flex:1;min-width:0;padding:8px 10px}
 .foot{color:var(--mute);font-size:12.5px;margin-top:18px;display:flex;align-items:center;gap:8px}
 .live{width:8px;height:8px;border-radius:50%;background:var(--ok);box-shadow:0 0 0 3px color-mix(in srgb,var(--ok) 25%,transparent)}
+
+/* ====== Finitions visuelles ====== */
+body{background:var(--bg)}
+.bar{box-shadow:0 1px 0 rgba(255,255,255,.04),0 6px 18px rgba(8,30,38,.18);position:relative;z-index:2}
+.tab[aria-current="page"]{box-shadow:0 2px 8px rgba(0,0,0,.18)}
+.card,.kpi,.act{box-shadow:0 1px 2px rgba(15,59,74,.05),0 6px 20px rgba(15,59,74,.05);border-color:color-mix(in srgb,var(--line) 75%,transparent)}
+.card{border-radius:16px}
+.card>header{padding:16px 18px 12px}
+.card h2{font-size:16.5px;font-weight:700;letter-spacing:-.01em}
+.hi{width:30px;height:30px;border-radius:9px;display:inline-flex;align-items:center;justify-content:center;flex:none;background:color-mix(in srgb,var(--teal) 13%,transparent);color:var(--teal)}
+.hi svg{width:17px;height:17px}
+.a-todo .hi{background:color-mix(in srgb,var(--bad) 12%,transparent);color:var(--bad)}
+.a-rap .hi{background:color-mix(in srgb,#e0a800 18%,transparent);color:var(--warn)}
+.a-ap .hi{background:color-mix(in srgb,var(--blue) 13%,transparent);color:var(--blue)}
+
+/* bandeau d'accueil */
+.hello{position:relative;overflow:hidden;background:linear-gradient(120deg,#0f3b4a 0%,#0e5763 55%,#0d8f83 100%);color:#fff;border-radius:18px;padding:24px 26px 22px;margin-bottom:16px;box-shadow:0 10px 30px rgba(15,59,74,.18);align-items:flex-end}
+.hello::after{content:"";position:absolute;right:-40px;bottom:-30px;width:520px;height:200px;opacity:.13;pointer-events:none;
+  background:url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 520 200'%3E%3Cg fill='none' stroke='%23fff' stroke-width='3'%3E%3Cpath d='M0 120c40-24 80-24 120 0s80 24 120 0 80-24 120 0 80 24 120 0 80-24 120 0'/%3E%3Cpath d='M0 150c40-24 80-24 120 0s80 24 120 0 80-24 120 0 80 24 120 0 80-24 120 0'/%3E%3Cpath d='M0 180c40-24 80-24 120 0s80 24 120 0 80-24 120 0 80 24 120 0 80-24 120 0'/%3E%3C/g%3E%3C/svg%3E") no-repeat right bottom/contain}
+.hello>*{position:relative;z-index:1}
+.hello h1{font-size:28px;font-weight:800;color:#fff}
+.hello .sub{color:rgba(255,255,255,.78)}
+.brief span{background:rgba(255,255,255,.12);border-color:rgba(255,255,255,.22);color:#fff;backdrop-filter:blur(2px)}
+.brief span.bad{background:rgba(255,120,110,.22);border-color:rgba(255,160,150,.55);color:#fff}
+.qa .btn{background:rgba(255,255,255,.1);border-color:rgba(255,255,255,.3);color:#fff;border-radius:10px;padding:9px 14px}
+.qa .btn:hover{background:rgba(255,255,255,.18)}
+.qa .btn.pri{background:#fff;border-color:#fff;color:#0f3b4a;box-shadow:0 4px 14px rgba(0,0,0,.15)}
+.qa .btn.pri:hover{background:#eef7f6}
+
+/* indicateurs */
+.kpi{border-radius:14px;padding:14px 16px 13px;gap:3px}
+.kpi::before{display:none}
+.kpi{display:grid;grid-template-columns:auto minmax(0,1fr);column-gap:9px;align-items:center}
+.kpi b,.kpi .s{grid-column:1/-1}
+.kpi .ic{width:28px;height:28px;border-radius:10px;display:flex;align-items:center;justify-content:center;background:var(--bg);color:var(--mute)}
+.kpi .ic svg{width:15px;height:15px}
+.kpi.bad .ic{background:var(--bad-bg);color:var(--bad)}
+.kpi.warn .ic{background:var(--warn-bg);color:var(--warn)}
+.kpi.ok .ic{background:var(--ok-bg);color:var(--ok)}
+.kpi .l{font-size:11px;line-height:1.25}
+.kpi b{font-size:32px;font-weight:800;letter-spacing:-.02em;margin-top:2px}
+.kpi.warn b{color:var(--warn)}
+.kpi:hover{border-color:var(--teal);box-shadow:0 2px 4px rgba(15,59,74,.06),0 10px 26px rgba(15,59,74,.09)}
+
+/* activité */
+.act{border-radius:14px;margin:0 0 16px;background:linear-gradient(180deg,var(--panel),color-mix(in srgb,var(--teal) 3%,var(--panel)))}
+.act b{font-size:22px;font-weight:800;letter-spacing:-.01em}
+.bar2{height:7px}
+.bar2 i{background:linear-gradient(90deg,var(--teal),#3fc7ba)}
+
+/* planning */
+table.wk td{border-bottom-color:color-mix(in srgb,var(--line) 70%,transparent)}
+.cell{border-radius:8px;border-left-width:4px}
+.cell.empty{color:color-mix(in srgb,var(--mute) 55%,transparent)}
+table.wk th.today{color:var(--teal)}
+
+.team{font-size:13.5px}
+.dot{width:10px;height:10px;border-radius:50%}
+
+/* listes */
+.pill{border-radius:7px;padding:3px 8px}
+.todo button{border-radius:10px}
+.chip{border-radius:9px;padding:5px 10px;background:var(--panel)}
+.chip:hover{background:color-mix(in srgb,var(--teal) 6%,var(--panel))}
+.rap li .t{line-height:1.4}
+.rap-add input{border-radius:10px}
+.rap-add .btn{border-radius:10px}
+
+/* connexion */
+#login{background:radial-gradient(1200px 600px at 85% 110%,rgba(13,143,131,.55),transparent 60%),linear-gradient(135deg,#0b2f3b,#0f3b4a 45%,#0e5763);position:relative;overflow:hidden}
+#login::before{content:"";position:absolute;left:0;right:0;bottom:0;height:220px;opacity:.12;pointer-events:none;
+  background:url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 1200 220' preserveAspectRatio='none'%3E%3Cg fill='none' stroke='%23fff' stroke-width='3'%3E%3Cpath d='M0 90c100-40 200-40 300 0s200 40 300 0 200-40 300 0 200 40 300 0'/%3E%3Cpath d='M0 140c100-40 200-40 300 0s200 40 300 0 200-40 300 0 200 40 300 0'/%3E%3Cpath d='M0 190c100-40 200-40 300 0s200 40 300 0 200-40 300 0 200 40 300 0'/%3E%3C/g%3E%3C/svg%3E") no-repeat bottom/100% 100%}
+#login form{position:relative;border-radius:18px;padding:30px 26px 26px;box-shadow:0 24px 60px rgba(0,0,0,.28);border:0}
+#login h1{font-size:22px;font-weight:800}
+#login .btn.pri{padding:11px 14px;border-radius:10px;font-size:15px;background:linear-gradient(120deg,#0f3b4a,#0d8f83);border:0}
+.roles label{border-radius:10px;padding:11px}
+#login input{border-radius:10px}
+.lfoot{position:relative;margin-top:16px;color:rgba(255,255,255,.6);font-size:12.5px;text-align:center}
+#login{flex-direction:column}
+@media (max-width:600px){.hello{padding:18px 16px;border-radius:14px}.hello::after{width:300px;opacity:.1}.hello h1{font-size:23px}.kpi b{font-size:26px}.qa .btn{padding:8px 12px;font-size:14px}.a-wk>header .meta{flex-basis:100%;order:5}}
+
 html.tech .gerant-only,html.tech .tabs{display:none!important}
 html.tech .who{margin-left:auto}
 html.tech .bar::after{content:"Dépannages";order:1;color:#fff;font-weight:700;font-size:16px}
@@ -187,6 +293,7 @@ html.tech .who{order:2}
     <p id="lerr" role="alert"></p>
     <button class="btn pri" type="submit" id="lbtn">Se connecter</button>
   </form>
+  <p class="lfoot">Hydreau Forage · Forage d'eau &amp; géothermie</p>
 </div>
 
 <div id="app" hidden>
@@ -205,7 +312,7 @@ html.tech .who{order:2}
     <section id="home">
       <div class="home-in">
         <div class="hello">
-          <div><h1 id="hello">Bonjour</h1><div class="sub" id="today"></div></div>
+          <div><h1 id="hello">Bonjour</h1><div class="sub" id="today"></div><div class="brief" id="brief"></div></div>
           <div class="qa">
             <button class="btn pri" type="button" data-act="newDep"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round"><path d="M12 5v14M5 12h14"/></svg>Dépannage</button>
             <button class="btn gerant-only" type="button" data-act="newCh"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round"><path d="M12 5v14M5 12h14"/></svg>Chantier</button>
@@ -214,18 +321,26 @@ html.tech .who{order:2}
         </div>
 
         <div class="kpis">
-          <button class="kpi" id="k-dep" data-go="depannages"><span class="l">Dépannages ouverts</span><b>–</b><span class="s">&nbsp;</span></button>
-          <button class="kpi" id="k-ch" data-go="planning"><span class="l">Chantiers actifs</span><b>–</b><span class="s">&nbsp;</span></button>
-          <button class="kpi" id="k-pb" data-go="planning"><span class="l">Chantiers en problème</span><b>–</b><span class="s">&nbsp;</span></button>
-          <button class="kpi gerant-only" id="k-imp" data-go="planning"><span class="l">Impayés</span><b>–</b><span class="s">&nbsp;</span></button>
-          <button class="kpi" id="k-parc" data-go="parc"><span class="l">Parc en retard</span><b>–</b><span class="s">&nbsp;</span></button>
-          <button class="kpi" id="k-rel" data-go="releves"><span class="l">Relevés manquants</span><b>–</b><span class="s">&nbsp;</span></button>
+          <button class="kpi" id="k-dep" data-go="depannages"><span class="ic"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M14.7 6.3a4 4 0 0 0-5.4 5.4L3 18l3 3 6.3-6.3a4 4 0 0 0 5.4-5.4l-2.8 2.8-2-2z"/></svg></span><span class="l">Dépannages ouverts</span><b>–</b><span class="s">&nbsp;</span></button>
+          <button class="kpi" id="k-ch" data-go="planning"><span class="ic"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M12 3v7"/><path d="M8.5 6.5 12 3l3.5 3.5"/><path d="M4 21c0-4.4 3.6-8 8-8s8 3.6 8 8"/><path d="M12 13v8"/></svg></span><span class="l">Chantiers actifs</span><b>–</b><span class="s">&nbsp;</span></button>
+          <button class="kpi" id="k-pb" data-go="planning"><span class="ic"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M10.3 3.9 1.8 18a2 2 0 0 0 1.7 3h17a2 2 0 0 0 1.7-3L13.7 3.9a2 2 0 0 0-3.4 0z"/><path d="M12 9v4M12 17h.01"/></svg></span><span class="l">Chantiers en problème</span><b>–</b><span class="s">&nbsp;</span></button>
+          <button class="kpi gerant-only" id="k-imp" data-go="planning"><span class="ic"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M17 6.5A7 7 0 1 0 17 17.5"/><path d="M4 10.5h9M4 13.5h9"/></svg></span><span class="l">Impayés</span><b>–</b><span class="s">&nbsp;</span></button>
+          <button class="kpi" id="k-parc" data-go="parc"><span class="ic"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><rect x="2" y="8" width="13" height="9" rx="1.5"/><path d="M15 11h4l3 3v3h-7"/><circle cx="6.5" cy="18" r="2"/><circle cx="17.5" cy="18" r="2"/></svg></span><span class="l">Parc en retard</span><b>–</b><span class="s">&nbsp;</span></button>
+          <button class="kpi" id="k-rel" data-go="releves"><span class="ic"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><circle cx="12" cy="12" r="9"/><path d="M12 7v5l3 2"/></svg></span><span class="l">Relevés manquants</span><b>–</b><span class="s">&nbsp;</span></button>
+        </div>
+
+        <div class="act gerant-only" aria-label="Activité de l'exercice">
+          <div><span class="l">Chiffre d'affaires</span><b id="a-ca">–</b><span class="s" id="a-ca-s">chantiers en cours d'exercice</span></div>
+          <div><span class="l">Encaissé</span><b id="a-enc">–</b><div class="bar2"><i id="a-enc-bar" style="width:0"></i></div></div>
+          <div><span class="l">Reste à encaisser</span><b id="a-rest">–</b><span class="s" id="a-rest-s">&nbsp;</span></div>
+          <div><span class="l">Mètres forés</span><b id="a-m">–</b><span class="s" id="a-m-s">&nbsp;</span></div>
         </div>
 
         <div class="cols">
+         <div class="colL">
           <section class="card a-wk">
             <header>
-              <h2>Planning des équipes</h2><span class="meta" id="wk-label"></span><span class="sp"></span>
+              <span class="hi"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><rect x="3" y="4.5" width="18" height="16" rx="2"/><path d="M3 9.5h18M8 3v3M16 3v3"/></svg></span><h2>Planning des équipes</h2><span class="meta" id="wk-label"></span><span class="sp"></span>
               <button class="ibtn" type="button" id="wk-prev" aria-label="Semaine précédente">‹</button>
               <button class="ibtn" type="button" id="wk-now" aria-label="Cette semaine" style="width:auto;padding:0 10px;font-size:13px;font-weight:600">Auj.</button>
               <button class="ibtn" type="button" id="wk-next" aria-label="Semaine suivante">›</button>
@@ -236,19 +351,30 @@ html.tech .who{order:2}
             <div class="wk-list" id="wk-list"></div>
           </section>
 
+          <section class="card a-ap">
+            <header><span class="hi"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M9 6h11M9 12h11M9 18h6"/><path d="M4 6h.01M4 12h.01M4 18h.01"/></svg></span><h2>À planifier</h2><span class="meta">pas encore placés sur le planning</span><span class="sp"></span><button class="lnk" type="button" data-go="planning">Ouvrir le planning</button></header>
+            <div class="ap">
+              <div><h3>Forages à démarrer <span class="c" id="ap-f-n">–</span></h3><div class="chips" id="ap-f"></div></div>
+              <div><h3>Raccordements en attente <span class="c" id="ap-r-n">–</span></h3><div class="chips" id="ap-r"></div></div>
+            </div>
+          </section>
+         </div>
+         <div class="colR">
+
           <section class="card a-todo">
-            <header><h2>À traiter</h2><span class="meta" id="todo-n"></span></header>
+            <header><span class="hi"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M5 21V4"/><path d="M5 4h11l-2 4 2 4H5"/></svg></span><h2>À traiter</h2><span class="meta" id="todo-n"></span></header>
             <ul class="todo" id="todo"></ul>
             <div class="empty" id="todo-load">Chargement…</div>
             <div class="more" id="todo-more" hidden><button class="lnk" type="button" id="todo-all"></button></div>
           </section>
 
           <section class="card a-rap">
-            <header><h2>Rappels</h2><span class="meta">visibles par toute l'équipe</span></header>
+            <header><span class="hi"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M12 17v5"/><path d="M9 3h6l-1 6 3 3v2H7v-2l3-3z"/></svg></span><h2>Rappels</h2><span class="meta">visibles par toute l'équipe</span></header>
             <ul class="rap" id="rap"></ul>
             <div class="empty" id="rap-empty" hidden>Aucun rappel pour l'instant.</div>
             <form class="rap-add" id="rap-form"><input id="rap-in" maxlength="240" placeholder="Ajouter un rappel…" autocomplete="off" aria-label="Nouveau rappel"><button class="btn" type="submit">Ajouter</button></form>
           </section>
+         </div>
         </div>
         <p class="foot"><span class="live"></span>Données partagées en direct entre tous les appareils connectés.</p>
       </div>
@@ -363,7 +489,39 @@ var DAYS=["Lun","Mar","Mer","Jeu","Ven"];
 function isoWeek(d){var x=new Date(Date.UTC(d.getFullYear(),d.getMonth(),d.getDate()));var n=x.getUTCDay()||7;x.setUTCDate(x.getUTCDate()+4-n);var y=new Date(Date.UTC(x.getUTCFullYear(),0,1));return Math.ceil(((x-y)/864e5+1)/7)}
 function mondayOf(off){var t=new Date();t.setHours(12,0,0,0);var wd=t.getDay();var m=new Date(t);m.setDate(t.getDate()-((wd+6)%7)+(wd===0||wd===6?7:0)+7*off);return m}
 function weekId(mon){var idx=Math.round((mon-WEEK_BASE)/(7*864e5));return idx===0?"s38":idx===1?"s39":"s"+isoWeek(mon)+"-"+mon.getFullYear()}
-var P={},C={},wkOff=0,selDay=null;
+var P={},C={},wkOff=0,selDay=null,WX={},DEP=[];
+var WXC=[[0,"☀️","Ensoleillé"],[2,"🌤️","Éclaircies"],[3,"☁️","Couvert"],[48,"🌫️","Brouillard"],[57,"🌦️","Bruine"],[67,"🌧️","Pluie"],[77,"🌨️","Neige"],[82,"🌧️","Averses"],[86,"🌨️","Averses de neige"],[99,"⛈️","Orage"]];
+function wxHtml(d,short){var w=WX[iso(d)];if(!w)return"";var c=WXC.filter(function(x){return w.c<=x[0]})[0]||WXC[WXC.length-1];
+  var rain=w.p>=1?' <small>'+Math.round(w.p)+' mm</small>':"";
+  return'<span class="wx" title="Météo Guingamp : '+c[2]+", "+Math.round(w.tmin)+"° / "+Math.round(w.t)+"°"+(w.p?", "+String(Math.round(w.p*10)/10).replace(".",",")+" mm":"")+(w.v?", vent "+Math.round(w.v)+" km/h":"")+'">'+c[1]+" "+Math.round(w.t)+"°"+(short?"":rain)+'</span>'}
+function loadWx(){
+  try{fetch("https://api.open-meteo.com/v1/forecast?latitude=48.56&longitude=-3.15&daily=weathercode,temperature_2m_max,temperature_2m_min,precipitation_sum,windspeed_10m_max&timezone=Europe%2FParis&past_days=7&forecast_days=16")
+  .then(function(r){return r.json()}).then(function(j){var d=j.daily;if(!d)return;d.time.forEach(function(t,i){WX[t]={c:d.weathercode[i],t:d.temperature_2m_max[i],tmin:d.temperature_2m_min[i],p:d.precipitation_sum[i],v:d.windspeed_10m_max[i]}});renderWeek()}).catch(function(){})}catch(e){}
+}
+/* ----- À planifier (même règle que le module Planning) ----- */
+function teamOf(cellId){var p=String(cellId).split("-");return p.length>=2?p[p.length-2]:""}
+function renderAP(){
+  var onF={},onR={};Object.keys(P).forEach(function(k){var c=P[k];if(!c||!c.chantierId)return;var t=teamOf(k);if(/^[abcd]$/.test(t))onF[c.chantierId]=1;if(t==="r1"||t==="r2")onR[c.chantierId]=1});
+  var F=[],R=[];Object.keys(C).forEach(function(id){var c=C[id];if(!c||c.archive)return;
+    if(c.forageStatut==="attente"&&!onF[id])F.push([id,c]);
+    if(!c.raccNA&&c.forageStatut==="ok"&&(c.raccStatut==null||c.raccStatut==="attente")&&!onR[id])R.push([id,c])});
+  function chips(L,el,n){L.sort(function(a,b){return String(a[1].client).localeCompare(String(b[1].client),"fr")});$(n).textContent=L.length;
+    $(el).innerHTML=L.length?L.slice(0,14).map(function(x){return'<button type="button" class="chip" data-fiche="'+esc(x[0])+'">'+esc(x[1].client||"(client)")+(x[1].commune?'<small>'+esc(x[1].commune)+'</small>':"")+'</button>'}).join("")+(L.length>14?'<button type="button" class="chip more" data-go="planning">+ '+(L.length-14)+' autres</button>':""):'<span class="empty" style="padding:0">Aucun</span>'}
+  chips(F,"#ap-f","#ap-f-n");chips(R,"#ap-r","#ap-r-n");
+}
+/* ----- Résumé du jour ----- */
+function renderBrief(){
+  var t=new Date(),wd=t.getDay();if(wd===0||wd===6){$("#brief").innerHTML="";return}
+  var wid=weekId(mondayOf(0)),di=wd-1,busy=0,off=0,free=0;
+  TEAMS.forEach(function(tm){var c=P[wid+"-"+tm[0]+"-"+di]||{};if(c.chantierId==="_conge"||c.chantierId==="_repli")off++;else if(c.chantierId)busy++;else free++});
+  var urg=DEP.filter(function(i){return i.urgence==="urgente"}).length,today=iso(t),dj=DEP.filter(function(i){return i.date===today}).length;
+  var h='<span>Aujourd\'hui : <b>'+busy+'</b> équipe'+(busy>1?"s":"")+' sur chantier</span>';
+  if(free)h+='<span><b>'+free+'</b> sans affectation</span>';
+  if(off)h+='<span><b>'+off+'</b> en repli / congé</span>';
+  if(dj)h+='<span><b>'+dj+'</b> dépannage'+(dj>1?"s":"")+' prévu'+(dj>1?"s":"")+' aujourd\'hui</span>';
+  if(urg)h+='<span class="bad"><b>'+urg+'</b> dépannage'+(urg>1?"s":"")+' urgent'+(urg>1?"s":"")+'</span>';
+  $("#brief").innerHTML=h;
+}
 function cellHtml(id,full){
   var c=P[id]||{},ch=c.chantierId,note=c.note?String(c.note):"";
   var team=TEAMS.filter(function(t){return id.indexOf("-"+t[0]+"-")>0})[0];var col=team?team[2]:"#888";
@@ -374,19 +532,20 @@ function cellHtml(id,full){
   return'<div class="cell empty">—</div>';
 }
 function renderWeek(){
+  try{renderAP();renderBrief()}catch(e){console.error(e)}
   var mon=mondayOf(wkOff),wid=weekId(mon),tIso=iso(new Date()),fri=new Date(mon);fri.setDate(mon.getDate()+4);
   var dates=DAYS.map(function(_,i){var d=new Date(mon);d.setDate(mon.getDate()+i);return d});
   var todayIdx=dates.map(iso).indexOf(tIso);
   var wn=new Date();var we=wn.getDay()===0||wn.getDay()===6;
   $("#wk-label").textContent="Semaine "+isoWeek(mon)+" · "+mon.getDate()+(mon.getMonth()!==fri.getMonth()?" "+mon.toLocaleDateString("fr-FR",{month:"short"}):"")+"–"+fri.getDate()+" "+fri.toLocaleDateString("fr-FR",{month:"short"})+(wkOff===0?(we?" (semaine prochaine)":" (cette semaine)"):"");
-  var h='<table class="wk"><thead><tr><th>Équipe</th>'+dates.map(function(d,i){return'<th'+(i===todayIdx?' class="today"':"")+'>'+DAYS[i]+" "+d.getDate()+'</th>'}).join("")+'</tr></thead><tbody>';
+  var h='<table class="wk"><thead><tr><th>Équipe</th>'+dates.map(function(d,i){return'<th'+(i===todayIdx?' class="today"':"")+'>'+DAYS[i]+" "+d.getDate()+wxHtml(d)+'</th>'}).join("")+'</tr></thead><tbody>';
   TEAMS.forEach(function(t){
     if(t[0]==="r1")h+='<tr class="sep"><td colspan="6">Raccordement</td></tr>';
     h+='<tr><td><div class="team"><span class="dot" style="background:'+t[2]+'"></span>'+t[1]+'</div></td>'+DAYS.map(function(_,i){return'<td'+(i===todayIdx?' class="today"':"")+'>'+cellHtml(wid+"-"+t[0]+"-"+i)+'</td>'}).join("")+'</tr>';
   });
   $("#wk-table").innerHTML=h+'</tbody></table>';
   if(selDay==null||selDay>4)selDay=todayIdx>=0?todayIdx:0;
-  $("#wk-days").innerHTML=dates.map(function(d,i){return'<button type="button" data-day="'+i+'" aria-pressed="'+(i===selDay)+'">'+(i===todayIdx?"Auj. ":DAYS[i]+" ")+d.getDate()+'</button>'}).join("");
+  $("#wk-days").innerHTML=dates.map(function(d,i){return'<button type="button" data-day="'+i+'" aria-pressed="'+(i===selDay)+'">'+(i===todayIdx?"Auj. ":DAYS[i]+" ")+d.getDate()+wxHtml(d,1)+'</button>'}).join("");
   var l="";TEAMS.forEach(function(t){if(t[0]==="r1")l+='<div class="sep">Raccordement</div>';l+='<div class="row"><div class="team"><span class="dot" style="background:'+t[2]+'"></span>'+t[1]+'</div>'+cellHtml(wid+"-"+t[0]+"-"+selDay)+'</div>'});
   $("#wk-list").innerHTML=l;
 }
@@ -397,9 +556,9 @@ $("#wk-days").addEventListener("click",function(e){var b=e.target.closest("[data
 document.addEventListener("click",function(e){var b=e.target.closest("[data-fiche]");if(b)openFiche(b.dataset.fiche)});
 
 /* ----- À traiter : tout ce qui demande une action, du plus urgent au moins urgent ----- */
-var TD={dep:null,ch:null,parc:null,rel:null},showAll=false,todoActs=[];
+var TD={dep:null,ch:null,parc:null,rel:null,stock:null},showAll=false,todoActs=[];
 function renderTodo(){
-  var parts=[TD.dep,TD.ch,TD.parc,TD.rel],ready=parts.some(function(x){return x});
+  var parts=[TD.dep,TD.ch,TD.parc,TD.rel,TD.stock],ready=parts.some(function(x){return x});
   var all=[].concat.apply([],parts.map(function(x){return x||[]}));
   all.sort(function(a,b){return a.sev-b.sev||a.o-b.o});
   var max=showAll?all.length:8;todoActs=all;
@@ -419,17 +578,17 @@ $("#todo").addEventListener("click",function(e){var b=e.target.closest("[data-to
 function start(role){
   var d=new Date();
   var h=d.getHours();
-  $("#hello").textContent=(h<5||h>=18?"Bonsoir":"Bonjour")+(role==="gerant"?" Fred":"");
+  $("#hello").textContent="Bonjour Hydreau";
   var td=d.toLocaleDateString("fr-FR",{weekday:"long",day:"numeric",month:"long",year:"numeric"});
   $("#today").textContent=td.charAt(0).toUpperCase()+td.slice(1)+" · semaine "+isoWeek(d);
   go(ls("hf-tab")||"home");
-  renderWeek();renderTodo();
+  renderWeek();renderTodo();loadWx();
   var db=firebase.firestore();
   function fail(k,msg){TD[k]=[{sev:1,o:0,c:"p-warn",p:"Erreur",src:msg,t:"Lecture impossible",d:"Droits d'accès Firestore ?",go:"home"}];renderTodo()}
 
   // Dépannages
   db.collection("equipes").doc(TEAM_ID).collection("interventions").onSnapshot(function(s){
-    var it=s.docs.map(function(x){return x.data()}).filter(function(i){return i.statut!=="done"});
+    var it=s.docs.map(function(x){return x.data()}).filter(function(i){return i.statut!=="done"});DEP=it;
     var urg=it.filter(function(i){return i.urgence==="urgente"});
     setKpi("k-dep",it.length,urg.length?urg.length+" urgent"+(urg.length>1?"s":""):"aucun urgent",urg.length?"bad":it.length?"warn":"ok");
     badge("n-dep",urg.length);
@@ -453,8 +612,28 @@ function start(role){
       setKpi("k-imp",imp.length,imp.length?eur(tot)+" à encaisser":"aucun",imp.length?"bad":"ok");
       items=items.concat(imp.map(function(c){var sd=Math.max(0,(c.montant||0)-paid(c));return{sev:0,o:2,c:"p-bad",p:"Impayé",src:"Facturation",t:c.client||"(client)",d:[c.commune,sd?"solde "+eur(sd):""].filter(Boolean).join(" · "),fiche:c.__id}}));
     }
+    if(role==="gerant"){
+      var ca=ch.reduce(function(a,c){return a+(c.montant||0)},0),enc=ch.reduce(function(a,c){return a+paid(c)},0);
+      var mR=0,mT=0;ch.forEach(function(c){var v=c.depth||0;if(!v)return;if(c.forageStatut==="ok")mR+=v;else mT+=v});
+      $("#a-ca").textContent=eur(ca);$("#a-ca-s").textContent=ch.filter(function(c){return c.montant}).length+" chantiers chiffrés";
+      $("#a-enc").textContent=eur(enc);$("#a-enc-bar").style.width=(ca?Math.min(100,enc/ca*100):0)+"%";
+      $("#a-rest").textContent=eur(Math.max(0,ca-enc));$("#a-rest-s").textContent=ca?Math.round(enc/ca*100)+" % encaissé":"\u00a0";
+      $("#a-m").textContent=mR.toLocaleString("fr-FR")+" m";$("#a-m-s").textContent=mT.toLocaleString("fr-FR")+" m restant à forer";
+    }
     TD.ch=items;renderTodo();renderWeek();
   },function(){fail("ch","Chantiers")});
+
+  // Stock du module Planning
+  var ST={stockSondes:{},stockCollecteurs:{},stockDivers:{},stockEquip:{}};
+  function stockTodo(){
+    var it=[];
+    ["stockSondes","stockCollecteurs","stockDivers"].forEach(function(k){Object.keys(ST[k]).forEach(function(id){var x=ST[k][id];var have=(x.stockGuingamp||0)+(x.stockRennes||0),need=x.besoin||0;
+      if(need>have){var nm=k==="stockSondes"?"Sondes "+(x.depth||"?")+" m":(x.label||x.name||"Article");it.push({sev:1,o:6,c:"p-warn",p:"Stock",src:"Stock chantiers",t:nm,d:"besoin "+need+", en stock "+have+" (manque "+(need-have)+")",go:"planning"})}})});
+    Object.keys(ST.stockEquip).forEach(function(id){var e=ST.stockEquip[id];if(e.state==="rupture")it.push({sev:1,o:6,c:"p-bad",p:"Rupture",src:"Stock matériel",t:e.name||"Matériel",d:e.depot?"dépôt "+(e.depot==="rennes"?"Rennes":"Guingamp"):"",go:"planning"});
+      else if(e.state==="low")it.push({sev:1,o:8,c:"p-warn",p:"Stock faible",src:"Stock matériel",t:e.name||"Matériel",d:e.depot?"dépôt "+(e.depot==="rennes"?"Rennes":"Guingamp"):"",go:"planning"})});
+    TD.stock=it;renderTodo();
+  }
+  Object.keys(ST).forEach(function(k){db.collection(k).onSnapshot(function(s){ST[k]={};s.docs.forEach(function(x){ST[k][x.id]=x.data()});stockTodo()},function(){})});
 
   // Planning des équipes
   db.collection("planning").onSnapshot(function(s){P={};s.docs.forEach(function(x){P[x.id]=x.data()});renderWeek()},function(){});

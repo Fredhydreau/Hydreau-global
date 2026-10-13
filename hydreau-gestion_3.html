@@ -288,6 +288,22 @@ table.wk th.today{color:var(--teal)}
 .brief button b{font-weight:700}
 .brief button::after{content:" ›";opacity:.7}
 .cell .x2{display:block;border-top:1px dashed color-mix(in srgb,var(--c) 45%,transparent);margin-top:3px;padding-top:2px}
+
+/* sauvegarde générale */
+.a-bk .hi{background:color-mix(in srgb,var(--navy) 12%,transparent);color:var(--navy)}
+.bk{padding:0 18px 16px}
+.bk p{margin:0 0 10px;font-size:14px}
+.bk-last{font-weight:600}
+.bk-last.warn{color:var(--warn)} .bk-last.bad{color:var(--bad)} .bk-last.ok{color:var(--ok)}
+.bk-txt{color:var(--mute)}
+.bk-opt{display:flex;gap:8px;align-items:center;text-transform:none;letter-spacing:0;font-weight:500;font-size:13px;color:var(--mute);margin:0 0 12px}
+.bk-opt input{width:auto}
+.bk-btns{display:flex;gap:8px;flex-wrap:wrap}
+.bk-btns .btn{display:inline-flex;align-items:center;gap:6px;border-radius:10px}
+.bk-btns .btn svg{width:16px;height:16px}
+.bk-btns .btn:disabled{opacity:.6;cursor:wait}
+.bk-msg{margin:10px 0 0!important;font-size:13px!important;color:var(--mute)}
+@media (max-width:980px){.a-bk{order:5}}
 html.tech .gerant-only,html.tech .tabs{display:none!important}
 html.tech .who{margin-left:auto}
 html.tech{--modc:#0b7f7a}
@@ -395,6 +411,21 @@ html.tech .who{order:2}
             <ul class="rap" id="rap"></ul>
             <div class="empty" id="rap-empty" hidden>Aucun rappel pour l'instant.</div>
             <form class="rap-add" id="rap-form"><input id="rap-in" maxlength="240" placeholder="Ajouter un rappel…" autocomplete="off" aria-label="Nouveau rappel"><button class="btn" type="submit">Ajouter</button></form>
+          </section>
+
+          <section class="card a-bk gerant-only">
+            <header><span class="hi"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><ellipse cx="12" cy="5.5" rx="8" ry="2.5"/><path d="M4 5.5v6c0 1.4 3.6 2.5 8 2.5s8-1.1 8-2.5v-6"/><path d="M4 11.5v6c0 1.4 3.6 2.5 8 2.5s8-1.1 8-2.5v-6"/></svg></span><h2>Sauvegarde générale</h2></header>
+            <div class="bk">
+              <p class="bk-last" id="bk-last">Dernière sauvegarde : …</p>
+              <p class="bk-txt">Un seul fichier avec <b>tout</b> : chantiers, planning, stock, documents joints, dépannages, relevés d'heures, parc et rappels.</p>
+              <label class="bk-opt"><input type="checkbox" id="bk-docs" checked> Inclure les documents joints aux chantiers (fichier plus lourd)</label>
+              <div class="bk-btns">
+                <button class="btn pri" type="button" id="bk-save"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M12 3v12m0 0-4-4m4 4 4-4"/><path d="M5 17v2a2 2 0 0 0 2 2h10a2 2 0 0 0 2-2v-2"/></svg>Télécharger la sauvegarde</button>
+                <button class="btn" type="button" id="bk-restore">Restaurer…</button>
+                <input type="file" id="bk-file" accept=".json,application/json" hidden>
+              </div>
+              <p class="bk-msg" id="bk-msg" role="status"></p>
+            </div>
           </section>
          </div>
         </div>
@@ -590,9 +621,9 @@ $("#wk-days").addEventListener("click",function(e){var b=e.target.closest("[data
 document.addEventListener("click",function(e){var b=e.target.closest("[data-fiche]");if(b)openFiche(b.dataset.fiche)});
 
 /* ----- À traiter : tout ce qui demande une action, du plus urgent au moins urgent ----- */
-var TD={dep:null,ch:null,parc:null,rel:null,stock:null},showAll=false,todoActs=[];
+var TD={dep:null,ch:null,parc:null,rel:null,stock:null,bk:null},showAll=false,todoActs=[];
 function renderTodo(){
-  var parts=[TD.dep,TD.ch,TD.parc,TD.rel,TD.stock],ready=parts.some(function(x){return x});
+  var parts=[TD.dep,TD.ch,TD.parc,TD.rel,TD.stock,TD.bk],ready=parts.some(function(x){return x});
   var all=[].concat.apply([],parts.map(function(x){return x||[]}));
   all.sort(function(a,b){return a.sev-b.sev||a.o-b.o});
   var max=showAll?all.length:8;todoActs=all;
@@ -607,7 +638,74 @@ function renderTodo(){
   $("#todo-all").textContent=showAll?"Réduire la liste":"Voir les "+all.length+" éléments";
 }
 $("#todo-all").onclick=function(){showAll=!showAll;renderTodo()};
-$("#todo").addEventListener("click",function(e){var b=e.target.closest("[data-todo]");if(!b)return;var i=todoActs[+b.dataset.todo];if(i.fiche)openFiche(i.fiche);else go(i.go)});
+$("#todo").addEventListener("click",function(e){var b=e.target.closest("[data-todo]");if(!b)return;var i=todoActs[+b.dataset.todo];if(i.act==="backup"){bkSave();return}if(i.fiche)openFiche(i.fiche);else go(i.go)});
+
+
+/* ----- Sauvegarde générale (tout le contenu de la base) ----- */
+var BK_COLS=["chantiers","planning","stockSondes","stockCollecteurs","stockDivers","stockEquip","rappels","meta","hf_releves","hf_recup","hf_config","parc","equipes/"+TEAM_ID+"/interventions","equipes/"+TEAM_ID+"/config"];
+function bkEnc(v){
+  if(v==null||typeof v!=="object")return v;
+  if(typeof v.toDate==="function"&&typeof v.seconds==="number")return{__ts:[v.seconds,v.nanoseconds||0]};
+  if(Array.isArray(v))return v.map(bkEnc);
+  var o={};Object.keys(v).forEach(function(k){o[k]=bkEnc(v[k])});return o;
+}
+function bkDec(v){
+  if(v==null||typeof v!=="object")return v;
+  if(Array.isArray(v))return v.map(bkDec);
+  if(v.__ts&&Object.keys(v).length===1)return new firebase.firestore.Timestamp(v.__ts[0],v.__ts[1]);
+  var o={};Object.keys(v).forEach(function(k){o[k]=bkDec(v[k])});return o;
+}
+function bkMsg(t){$("#bk-msg").textContent=t||""}
+function bkAgo(ts){if(!ts)return null;var d=Math.floor((Date.now()-ts)/864e5);return d}
+function bkRenderLast(m){
+  var el=$("#bk-last"),d=m&&m.at?bkAgo(m.at):null;
+  if(d==null){el.textContent="Aucune sauvegarde générale pour l'instant.";el.className="bk-last bad";}
+  else{var dt=new Date(m.at);el.textContent="Dernière sauvegarde : "+(d===0?"aujourd'hui":d===1?"hier":"il y a "+d+" jours")+" ("+dt.toLocaleDateString("fr-FR")+" à "+dt.toLocaleTimeString("fr-FR",{hour:"2-digit",minute:"2-digit"})+")";el.className="bk-last "+(d>7?"bad":d>3?"warn":"ok");}
+  TD.bk=(d==null||d>7)?[{sev:1,o:9,c:"p-warn",p:"Sauvegarde",src:"Sauvegarde générale",t:d==null?"Aucune sauvegarde générale":"Dernière sauvegarde il y a "+d+" jours",d:"Cliquez pour télécharger une sauvegarde de tout",act:"backup"}]:[];
+  renderTodo();
+}
+function bkSave(){
+  var db=firebase.firestore(),btn=$("#bk-save"),withDocs=$("#bk-docs").checked;
+  var cols=BK_COLS.concat(withDocs?["docFiles"]:[]);
+  btn.disabled=true;bkMsg("Lecture de la base…");
+  var out={app:"Hydreau Gestion",format:1,date:new Date().toISOString(),avecDocuments:withDocs,docs:{}},counts={};
+  Promise.all(cols.map(function(c){return db.collection(c).get().then(function(snap){counts[c]=snap.size;snap.forEach(function(d){out.docs[c+"/"+d.id]=bkEnc(d.data())})})}))
+  .then(function(){
+    var n=Object.keys(out.docs).length;out.nombre=n;out.parCollection=counts;
+    var txt=JSON.stringify(out),blob=new Blob([txt],{type:"application/json"});
+    var a=document.createElement("a");a.href=URL.createObjectURL(blob);a.download="hydreau-sauvegarde-generale-"+iso(new Date())+".json";
+    document.body.appendChild(a);a.click();setTimeout(function(){URL.revokeObjectURL(a.href);a.remove()},1500);
+    var mo=(blob.size/1048576);
+    bkMsg("✓ "+n+" éléments sauvegardés ("+(mo<1?Math.max(1,Math.round(blob.size/1024))+" Ko":mo.toFixed(1).replace(".",",")+" Mo")+"). Le fichier est dans vos Téléchargements : rangez-le en lieu sûr (clé USB, Drive…).");
+    var u=firebase.auth().currentUser;
+    return db.doc("meta/sauvegarde").set({at:Date.now(),par:(u&&u.email)||"",elements:n,taille:blob.size});
+  }).catch(function(e){console.error(e);bkMsg("La sauvegarde a échoué : "+((e&&e.message)||e)+". Vérifiez la connexion et réessayez.")})
+  .then(function(){btn.disabled=false});
+}
+function bkRestore(file){
+  var reader=new FileReader();
+  reader.onload=function(){
+    var data;try{data=JSON.parse(reader.result)}catch(e){bkMsg("Ce fichier n'est pas une sauvegarde valide.");return}
+    if(!data||data.app!=="Hydreau Gestion"||!data.docs){bkMsg("Ce fichier n'est pas une sauvegarde générale Hydreau Gestion.");return}
+    var keys=Object.keys(data.docs).filter(function(k){return k!=="meta/sauvegarde"});
+    var dd=new Date(data.date);
+    if(!confirm("Restaurer la sauvegarde du "+dd.toLocaleDateString("fr-FR")+" à "+dd.toLocaleTimeString("fr-FR",{hour:"2-digit",minute:"2-digit"})+" ?\n\n"+keys.length+" éléments vont être remis dans l'état de cette sauvegarde (chantiers, planning, dépannages, relevés, parc…).\nLes modifications faites depuis sur ces mêmes éléments seront perdues. Les éléments créés après la sauvegarde sont conservés."))return;
+    if(prompt("Pour confirmer, tapez RESTAURER en majuscules :")!=="RESTAURER"){bkMsg("Restauration annulée.");return}
+    var db=firebase.firestore(),btn=$("#bk-restore");btn.disabled=true;
+    var small=keys.filter(function(k){return k.indexOf("docFiles/")!==0}),files=keys.filter(function(k){return k.indexOf("docFiles/")===0});
+    var done=0,chunks=[];for(var i=0;i<small.length;i+=300)chunks.push(small.slice(i,i+300));
+    var p=Promise.resolve();
+    chunks.forEach(function(ch){p=p.then(function(){var b=db.batch();ch.forEach(function(k){b.set(db.doc(k),bkDec(data.docs[k]))});return b.commit().then(function(){done+=ch.length;bkMsg("Restauration… "+done+" / "+keys.length)})})});
+    files.forEach(function(k){p=p.then(function(){return db.doc(k).set(bkDec(data.docs[k])).then(function(){done++;bkMsg("Restauration… "+done+" / "+keys.length)})})});
+    p.then(function(){bkMsg("✓ Restauration terminée : "+done+" éléments remis en place. Rechargez la page (⌘ Cmd + R) pour tout voir à jour.")})
+     .catch(function(e){console.error(e);bkMsg("Restauration interrompue après "+done+" éléments : "+((e&&e.message)||e))})
+     .then(function(){btn.disabled=false});
+  };
+  reader.readAsText(file);
+}
+$("#bk-save").onclick=bkSave;
+$("#bk-restore").onclick=function(){$("#bk-file").click()};
+$("#bk-file").onchange=function(e){var f=e.target.files[0];e.target.value="";if(f)bkRestore(f)};
 
 function start(role){
   var d=new Date();
@@ -705,6 +803,9 @@ function start(role){
     TD.rel=miss.length?[{sev:1,o:7,c:"p-warn",p:"Manquant",src:"Relevés d'heures · "+wl,t:miss.join(", "),d:miss.length+" salarié"+(miss.length>1?"s n'ont":" n'a")+" pas rendu son relevé",go:"releves"}]:[];
     renderTodo();
   },function(){fail("rel","Relevés")});
+
+  // Sauvegarde générale : date de la dernière
+  if(role==="gerant")db.doc("meta/sauvegarde").onSnapshot(function(s){bkRenderLast(s.exists?s.data():null)},function(){});
 
   // Rappels (partagés avec le module Planning)
   db.collection("rappels").onSnapshot(function(s){

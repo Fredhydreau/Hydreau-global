@@ -100,7 +100,7 @@ input,select{width:100%;font:inherit;padding:10px 12px;border:1px solid var(--li
 
 .cols{display:grid;grid-template-columns:minmax(0,1.65fr) minmax(300px,1fr);gap:14px;align-items:start}
 .colL,.colR{display:flex;flex-direction:column;gap:14px;min-width:0}
-@media (max-width:1200px){.cols{grid-template-columns:minmax(0,1fr)}.colL,.colR{display:contents}.a-todo{order:1}.a-wk{order:2}.a-ap{order:3}.a-rap{order:4}}
+@media (max-width:1200px){.cols{grid-template-columns:minmax(0,1fr)}.colL,.colR{display:contents}.a-rap{order:1}.a-todo{order:2}.a-wk{order:3}.a-ap{order:4}}
 .brief{margin-top:8px;font-size:14.5px;color:var(--ink);display:flex;flex-wrap:wrap;gap:6px 8px}
 .brief span{background:var(--panel);border:1px solid var(--line);border-radius:20px;padding:3px 10px;white-space:nowrap}
 .brief span b{font-weight:700}
@@ -303,10 +303,10 @@ table.wk th.today{color:var(--teal)}
 .bk-btns .btn svg{width:16px;height:16px}
 .bk-btns .btn:disabled{opacity:.6;cursor:wait}
 .bk-msg{margin:10px 0 0!important;font-size:13px!important;color:var(--mute)}
-@media (max-width:980px){.a-bk{order:5}}
+@media (max-width:1200px){.a-bk{order:5}}
 /* pleine largeur, s'adapte à l'écran */
 #home{padding:clamp(12px,1.6vw,28px) clamp(12px,2vw,36px) 48px}
-.cols{grid-template-columns:minmax(0,1.7fr) minmax(320px,1fr)}
+@media (min-width:1201px){.cols{grid-template-columns:minmax(0,1.7fr) minmax(320px,1fr)}}
 @media (min-width:1600px){.kpis{gap:14px}.cols{gap:18px}.colL,.colR{gap:18px}table.wk{font-size:13.5px}.cell b{font-size:13px}}
 @media (max-width:1200px){.kpis{grid-template-columns:repeat(3,minmax(0,1fr))}}
 @media (max-width:600px){.kpis{grid-template-columns:repeat(2,minmax(0,1fr))}}
@@ -432,18 +432,18 @@ html.tech .who{order:2}
          </div>
          <div class="colR">
 
-          <section class="card a-todo">
-            <header><span class="hi"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M5 21V4"/><path d="M5 4h11l-2 4 2 4H5"/></svg></span><h2>À traiter</h2><span class="meta" id="todo-n"></span></header>
-            <ul class="todo" id="todo"></ul>
-            <div class="empty" id="todo-load">Chargement…</div>
-            <div class="more" id="todo-more" hidden><button class="lnk" type="button" id="todo-all"></button></div>
-          </section>
-
           <section class="card a-rap">
             <header><span class="hi"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M12 17v5"/><path d="M9 3h6l-1 6 3 3v2H7v-2l3-3z"/></svg></span><h2>Rappels</h2><span class="meta">visibles par toute l'équipe</span></header>
             <ul class="rap" id="rap"></ul>
             <div class="empty" id="rap-empty" hidden>Aucun rappel pour l'instant.</div>
             <form class="rap-add" id="rap-form"><input id="rap-in" maxlength="240" placeholder="Ajouter un rappel…" autocomplete="off" aria-label="Nouveau rappel"><button class="btn" type="submit">Ajouter</button></form>
+          </section>
+
+          <section class="card a-todo">
+            <header><span class="hi"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M5 21V4"/><path d="M5 4h11l-2 4 2 4H5"/></svg></span><h2>À traiter</h2><span class="meta" id="todo-n"></span></header>
+            <ul class="todo" id="todo"></ul>
+            <div class="empty" id="todo-load">Chargement…</div>
+            <div class="more" id="todo-more" hidden><button class="lnk" type="button" id="todo-all"></button></div>
           </section>
 
           <section class="card a-bk gerant-only">

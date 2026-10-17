@@ -355,6 +355,14 @@ table.wk th.today{color:var(--teal)}
 .cmd-tab[aria-selected="true"]{background:var(--panel);color:var(--ink);box-shadow:0 1px 3px rgba(0,0,0,.1)}
 .cmd-x{border:0;background:transparent;font-size:24px;line-height:1;color:var(--mute);padding:2px 8px;border-radius:8px}
 .cmd-x:hover{background:var(--bg);color:var(--ink)}
+.cmd-min{border:1px solid var(--line);background:#fff;font-size:13px;font-weight:600;color:var(--ink);padding:6px 12px;border-radius:9px;cursor:pointer}
+.cmd-min:hover{background:var(--bg)}
+.cmd-pill{position:fixed;right:18px;bottom:18px;z-index:190;display:flex;align-items:center;gap:10px;border:0;border-radius:999px;padding:11px 16px 11px 14px;background:#0f3b4a;color:#fff;font:inherit;font-size:14px;box-shadow:0 8px 24px rgba(10,30,38,.3);cursor:pointer}
+.cmd-pill .dot{width:9px;height:9px;border-radius:50%;background:#f2b84b;box-shadow:0 0 0 3px rgba(242,184,75,.3)}
+.cmd-pill .go{background:rgba(255,255,255,.16);border-radius:999px;padding:3px 10px;font-size:12.5px;font-weight:700}
+.cmd-pill[hidden]{display:none}
+@media (max-width:760px){.cmd-pill{bottom:84px;right:12px;left:12px;justify-content:center}}
+.cmd-row .btn.del{color:#b42318}
 .cmd-body{padding:16px 20px 20px}
 .cmd-grid{display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:10px 14px;margin-bottom:14px}
 .cmd-body .f label{margin-bottom:3px}
@@ -533,6 +541,7 @@ html.tech .who{order:2}
   </div>
 </div>
 
+<button type="button" class="cmd-pill" id="cmdPill" hidden><span class="dot"></span><b>Bon de commande en cours</b><span class="go">Reprendre</span></button>
 <div class="cmd-ov" id="cmdOv" hidden>
   <div class="cmd-panel" role="dialog" aria-modal="true" aria-labelledby="cmdTitle">
     <div class="cmd-head">
@@ -541,6 +550,7 @@ html.tech .who{order:2}
         <button type="button" class="cmd-tab" data-cmdtab="new" aria-selected="true">Nouvelle</button>
         <button type="button" class="cmd-tab" data-cmdtab="hist" aria-selected="false">Historique <span id="cmdHistN"></span></button>
       </div>
+      <button type="button" class="cmd-min" id="cmdMin" title="Réduire pour consulter le logiciel (le bon reste en cours)">&#8212; Réduire</button>
       <button type="button" class="cmd-x" id="cmdClose" aria-label="Fermer">×</button>
     </div>
     <div class="cmd-body" id="cmdNew">
@@ -971,7 +981,7 @@ function cmdFillCh(sel){var o='<option value="">— Stock / dépôt (pas de chan
 function cmdUsFill(){var u=CMD.us;$("#cmdUsNom").value=u.nom||"Hydreau Forage";$("#cmdUsAdr").value=u.adr||"ZA de Keranfeuillen, 22540 Tréglamus";$("#cmdUsTel").value=u.tel||"";$("#cmdUsMail").value=u.mail||"contact@hydreau-forage.fr";$("#cmdUsTva").value=u.tva||""}
 function cmdUsRead(){return{nom:$("#cmdUsNom").value.trim(),adr:$("#cmdUsAdr").value.trim(),tel:$("#cmdUsTel").value.trim(),mail:$("#cmdUsMail").value.trim(),tva:$("#cmdUsTva").value.trim()}}
 function cmdReset(pre){
-  CMD.editing=null;$("#cmdSub").textContent="Nouvelle commande fournisseur";
+  CMD.editing=null;CMD.dirty=false;$("#cmdSub").textContent="Nouvelle commande fournisseur";
   $("#cmdF").value=pre&&pre.fournisseur?pre.fournisseur.nom:"";$("#cmdFMail").value=pre&&pre.fournisseur?pre.fournisseur.mail:"";$("#cmdFTel").value=pre&&pre.fournisseur?pre.fournisseur.tel:"";
   cmdFillCh(pre?pre.chantierId:"");$("#cmdLiv").value=pre?pre.livraison:"Dépôt de Guingamp";$("#cmdDate").value="";$("#cmdRq").value=pre?pre.remarques||"":"";
   cmdSetLines(pre?pre.lignes:null);cmdUsFill();cmdMsg("");
@@ -979,8 +989,10 @@ function cmdReset(pre){
   $("#cmdPar").value=(pre&&pre.par)||lp.nom||"";$("#cmdParTel").value=(pre&&pre.parTel)||lp.tel||"";
 }
 function cmdTab(t){document.querySelectorAll(".cmd-tab").forEach(function(b){b.setAttribute("aria-selected",String(b.dataset.cmdtab===t))});$("#cmdNew").hidden=t!=="new";$("#cmdHist").hidden=t!=="hist";if(t==="hist")cmdRenderHist()}
-function cmdOpen(chId){if(!CMD.db)return;cmdReset();if(chId)cmdFillCh(chId);cmdTab("new");$("#cmdOv").hidden=false;setTimeout(function(){$("#cmdF").focus()},50)}
-function cmdClose(){$("#cmdOv").hidden=true}
+function cmdOpen(chId){if(!CMD.db)return;if(CMD.dirty){cmdRestore();return}cmdReset();if(chId)cmdFillCh(chId);cmdTab("new");$("#cmdOv").hidden=false;$("#cmdPill").hidden=true;setTimeout(function(){$("#cmdF").focus()},50)}
+function cmdRestore(){$("#cmdOv").hidden=false;$("#cmdPill").hidden=true}
+function cmdMinimize(){$("#cmdOv").hidden=true;$("#cmdPill").hidden=!CMD.dirty;if(!CMD.dirty)return}
+function cmdClose(force){if(CMD.dirty&&!force){if(!confirm("Fermer et effacer le bon de commande en cours ?\n\n(Pour consulter le logiciel sans le perdre, utilisez « Réduire ».)"))return}CMD.dirty=false;$("#cmdOv").hidden=true;$("#cmdPill").hidden=true}
 function cmdLivTxt(o){if(o.livraison!=="chantier")return o.livraison;var c=CMD.ch[o.chantierId];return"Sur le chantier"+(c?" : "+[c.adresse,c.commune,c.dept?"("+c.dept+")":""].filter(Boolean).join(" "):"")+(c&&c.telephone?" — contact "+c.telephone:"")}
 function cmdCollect(){
   var lignes=cmdReadLines();
@@ -1037,7 +1049,7 @@ function cmdRenderHist(){
     return'<div class="cmd-row"><div class="n">'+esc(o.num)+'<small>'+new Date(o.date).toLocaleDateString("fr-FR")+'</small></div>'
       +'<div class="w"><b>'+esc(o.fournisseur.nom)+'</b><span>'+o.lignes.length+' article'+(o.lignes.length>1?"s":"")+(tot?" · "+eur2(tot)+" HT":"")+(o.chantierLabel?" · "+esc(o.chantierLabel):" · stock")+(o.par?" · par "+esc(o.par):"")+(cmdStkLines(o).length&&o.livraison!=="chantier"?(o.stockAjoute?' · <i class="stk-ok">entrée en stock faite</i>':(o.statut==="envoyee"?' · <i class="stk-p">compté « en commande » dans le stock</i>':"")):"")+'</span></div>'
       +'<div class="a"><select data-cmdst="'+i+'" class="cmd-st-'+o.statut+'"><option value="envoyee"'+(o.statut==="envoyee"?" selected":"")+'>Envoyée</option><option value="recue"'+(o.statut==="recue"?" selected":"")+'>Reçue</option><option value="annulee"'+(o.statut==="annulee"?" selected":"")+'>Annulée</option></select>'
-      +'<button type="button" class="btn" data-cmdpdf="'+i+'">PDF</button><button type="button" class="btn" data-cmddup="'+i+'">Refaire</button></div></div>';
+      +'<button type="button" class="btn" data-cmdpdf="'+i+'">PDF</button><button type="button" class="btn" data-cmddup="'+i+'">Refaire</button><button type="button" class="btn del" data-cmddel="'+i+'" title="Supprimer ce bon">Supprimer</button></div></div>';
   }).join(""):'<p class="empty" style="padding:6px 0">Aucune commande pour l\'instant.</p>';
 }
 function cmdInit(db){
@@ -1050,17 +1062,22 @@ function cmdInit(db){
   db.collection("acheteurs").onSnapshot(function(s){CMD.ach={};s.docs.forEach(function(x){var d=x.data();CMD.ach[String(d.nom).toLowerCase()]=d});$("#cmdParList").innerHTML=Object.keys(CMD.ach).map(function(k){return'<option value="'+esc(CMD.ach[k].nom)+'">'}).join("")},function(){});
 }
 document.addEventListener("click",function(e){
-  if(e.target.closest("#cmdClose")||e.target.id==="cmdOv"){cmdClose();return}
+  if(e.target.closest("#cmdClose")){cmdClose();return}
+  if(e.target.closest("#cmdMin")||e.target.id==="cmdOv"){if(CMD.dirty)cmdMinimize();else cmdClose(true);return}
+  if(e.target.closest("#cmdPill")){cmdRestore();return}
+  var dx=e.target.closest("[data-cmddel]");if(dx){var od=CMD.hist[+dx.dataset.cmddel];if(!od)return;
+    if(!confirm("Supprimer définitivement le bon de commande "+od.num+" ("+od.fournisseur.nom+") ?"+(od.stockAjoute?"\n\nAttention : ses quantités ont déjà été ajoutées au stock, elles n'en seront pas retirées.":"")))return;
+    CMD.db.doc("commandes/"+od.num).delete().then(function(){cmdMsg("Bon "+od.num+" supprimé.")}).catch(function(err){console.error(err);alert("Suppression impossible : "+((err&&err.message)||err))});return}
   var tb=e.target.closest("[data-cmdtab]");if(tb){cmdTab(tb.dataset.cmdtab);return}
   if(e.target.closest("#cmdAddLine")){$("#cmdLines").insertAdjacentHTML("beforeend",cmdLineHtml({}));var ls=document.querySelectorAll("#cmdLines .des");ls[ls.length-1].focus();return}
   var dl=e.target.closest("#cmdLines .del");if(dl){dl.closest(".cmd-line").remove();cmdCalc();return}
   var pb=e.target.closest("[data-cmdpdf]");if(pb){cmdDownload(CMD.hist[+pb.dataset.cmdpdf]);return}
-  var du=e.target.closest("[data-cmddup]");if(du){cmdReset(CMD.hist[+du.dataset.cmddup]);cmdTab("new");cmdMsg("Commande recopiée : modifiez si besoin puis envoyez (nouveau numéro).");return}
+  var du=e.target.closest("[data-cmddup]");if(du){cmdReset(CMD.hist[+du.dataset.cmddup]);CMD.dirty=true;cmdTab("new");cmdMsg("Commande recopiée : modifiez si besoin puis envoyez (nouveau numéro).");return}
   var go=e.target.closest("#cmdPdf,#cmdSend");if(go){
     var o=cmdCollect();if(!o)return;var send=go.id==="cmdSend";
     if(send&&!o.fournisseur.mail&&!(navigator.canShare)){cmdMsg("Indiquez l'e-mail du fournisseur.");$("#cmdFMail").focus();return}
     go.disabled=true;cmdMsg("Enregistrement…");
-    cmdSave(o).then(function(o2){$("#cmdSub").textContent="Commande "+o2.num+" enregistrée";
+    cmdSave(o).then(function(o2){CMD.dirty=false;$("#cmdSub").textContent="Commande "+o2.num+" enregistrée";
       if(send){var b=cmdPdf(o2);return cmdSend(o2,b)}cmdDownload(o2);cmdMsg("✓ Commande "+o2.num+" enregistrée — PDF téléchargé.")})
     .catch(function(err){console.error(err);cmdMsg("Erreur : "+((err&&err.message)||err))}).then(function(){go.disabled=false});
   }
@@ -1090,7 +1107,9 @@ document.addEventListener("change",function(e){
   }
   CMD.db.doc("commandes/"+o.num).update(u);
 });
-document.addEventListener("keydown",function(e){if(e.key==="Escape"&&!$("#cmdOv").hidden)cmdClose()});
+document.addEventListener("keydown",function(e){if(e.key==="Escape"&&!$("#cmdOv").hidden){if(CMD.dirty)cmdMinimize();else cmdClose(true)}});
+document.addEventListener("input",function(e){if(e.target.closest&&e.target.closest("#cmdNew"))CMD.dirty=true},true);
+document.addEventListener("change",function(e){if(e.target.closest&&e.target.closest("#cmdNew"))CMD.dirty=true},true);
 
 function start(role){
   var d=new Date();

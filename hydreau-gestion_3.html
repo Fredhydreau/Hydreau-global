@@ -370,6 +370,8 @@ table.wk th.today{color:var(--teal)}
 .cmd-body textarea{width:100%;font:inherit;border:1px solid var(--line);border-radius:8px;background:var(--panel);color:var(--ink);resize:vertical}
 .cmd-lines-h{display:flex;align-items:baseline;gap:10px;margin:4px 0 6px}
 .cmd-hint{color:var(--mute);font-size:12px}
+.todo-pdf{margin-left:auto;border:1px solid var(--line);background:#fff;color:#b42318;font:inherit;font-size:12.5px;font-weight:700;padding:5px 11px;border-radius:8px;cursor:pointer;white-space:nowrap}
+.todo-pdf:hover{background:#fdeeee}
 .cmd-line .stkw{grid-column:1/-1;display:flex;align-items:center;gap:8px;font-size:12px;color:var(--mute);margin:-2px 0 4px}
 .cmd-line .stkw select{max-width:260px;padding:4px 6px;font-size:12.5px}
 .stk-p{color:#a86f00;font-style:normal;font-weight:600}.stk-ok{color:#2f6b3a;font-style:normal;font-weight:600}
@@ -513,7 +515,7 @@ html.tech .who{order:2}
           </section>
 
           <section class="card a-todo">
-            <header><span class="hi"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M5 21V4"/><path d="M5 4h11l-2 4 2 4H5"/></svg></span><h2>À traiter</h2><span class="meta" id="todo-n"></span></header>
+            <header><span class="hi"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M5 21V4"/><path d="M5 4h11l-2 4 2 4H5"/></svg></span><h2>À traiter</h2><span class="meta" id="todo-n"></span><button type="button" class="todo-pdf" id="todo-pdf" title="Imprimer les dépannages urgents et les chantiers en problème">PDF urgences</button></header>
             <ul class="todo" id="todo"></ul>
             <div class="empty" id="todo-load">Chargement…</div>
             <div class="more" id="todo-more" hidden><button class="lnk" type="button" id="todo-all"></button></div>
@@ -796,6 +798,7 @@ function renderTodo(){
   $("#todo-all").textContent=showAll?"Réduire la liste":"Voir les "+all.length+" éléments";
 }
 $("#todo-all").onclick=function(){showAll=!showAll;renderTodo()};
+$("#todo-pdf").onclick=function(){try{urgPdf()}catch(e){console.error(e);alert("Impossible de créer le PDF")}};
 $("#todo").addEventListener("click",function(e){var b=e.target.closest("[data-todo]");if(!b)return;var i=todoActs[+b.dataset.todo];if(i.act==="backup"){bkSave();return}if(i.fiche)openFiche(i.fiche);else go(i.go)});
 
 
@@ -882,6 +885,68 @@ function pdfWrap(text,size,maxW,bold){var out=[];String(text||"").split(/\r?\n/)
 function eur2(n){return (Number(n)||0).toLocaleString("fr-FR",{minimumFractionDigits:2,maximumFractionDigits:2})+" €"}
 function numFr(n){return (Math.round((Number(n)||0)*100)/100).toLocaleString("fr-FR",{maximumFractionDigits:2})}
 
+function pdfAssemble(contents,W,H){
+  var n=contents.length;
+  var img=atob(LOGO_JPG),objs=[],kids=[];
+  objs.push("<< /Type /Catalog /Pages 2 0 R >>");
+  for(var p=0;p<n;p++)kids.push((3+p*2)+" 0 R");
+  objs.push("<< /Type /Pages /Kids ["+kids.join(" ")+"] /Count "+n+" >>");
+  var f1=3+n*2,f2=f1+1,im=f2+1;
+  contents.forEach(function(c){objs.push("<< /Type /Page /Parent 2 0 R /MediaBox [0 0 "+W+" "+H+"] /Resources << /Font << /F1 "+f1+" 0 R /F2 "+f2+" 0 R >> /XObject << /Im1 "+im+" 0 R >> >> /Contents "+(objs.length+2)+" 0 R >>");objs.push("<< /Length "+c.length+" >>\nstream\n"+c+"\nendstream")});
+  objs.push("<< /Type /Font /Subtype /Type1 /BaseFont /Helvetica-Bold /Encoding /WinAnsiEncoding >>");
+  objs.push("<< /Type /Font /Subtype /Type1 /BaseFont /Helvetica /Encoding /WinAnsiEncoding >>");
+  objs.push("<< /Type /XObject /Subtype /Image /Width 284 /Height 201 /ColorSpace /DeviceRGB /BitsPerComponent 8 /Filter /DCTDecode /Length "+img.length+" >>\nstream\n"+img+"\nendstream");
+  var pdf="%PDF-1.4\n%\xE2\xE3\xCF\xD3\n",off=[0];
+  objs.forEach(function(ob,i){off.push(pdf.length);pdf+=(i+1)+" 0 obj\n"+ob+"\nendobj\n"});
+  var xs=pdf.length,x="xref\n0 "+(objs.length+1)+"\n0000000000 65535 f \n";
+  for(var j=1;j<=objs.length;j++)x+=String(off[j]).padStart(10,"0")+" 00000 n \n";
+  pdf+=x+"trailer\n<< /Size "+(objs.length+1)+" /Root 1 0 R >>\nstartxref\n"+xs+"\n%%EOF";
+  var bytes=new Uint8Array(pdf.length);for(var k=0;k<pdf.length;k++)bytes[k]=pdf.charCodeAt(k)&255;
+  return new Blob([bytes],{type:"application/pdf"});
+}
+
+/* ----- PDF « Urgences et problèmes » (bouton dans À traiter) ----- */
+function urgPdf(){
+  var W=595,H=842,M=36,pages=[],ops,y,navy="0.059 0.231 0.290",red="0.70 0.14 0.14";
+  function T(f,s2,x,yy,str,rgb){if(rgb)ops.push(rgb+" rg");ops.push("BT /"+f+" "+s2+" Tf "+(Math.round(x*100)/100)+" "+(Math.round(yy*100)/100)+" Td ("+pdfS(str)+") Tj ET")}
+  function Rc(x,yy,w,h,rgb){ops.push(rgb+" rg "+x+" "+yy+" "+w+" "+h+" re f")}
+  function L(x1,y1,x2,y2,rgb,w){ops.push((rgb||"0.85 0.88 0.89")+" RG "+(w||0.5)+" w "+x1+" "+y1+" m "+x2+" "+y2+" l S")}
+  var now=new Date(),dstr=now.toLocaleDateString("fr-FR")+" à "+now.toLocaleTimeString("fr-FR",{hour:"2-digit",minute:"2-digit"});
+  function newPage(){if(ops)pages.push(ops);ops=[];
+    if(!pages.length){var lw=78,lh=Math.round(lw*201/284*100)/100;ops.push("q "+lw+" 0 0 "+lh+" "+M+" "+(H-M-lh)+" cm /Im1 Do Q");
+      T("F1",17,M+lw+16,H-M-18,"Urgences et problèmes",navy);T("F2",9.5,M+lw+16,H-M-34,"Édité le "+dstr,"0.4 0.4 0.4");y=H-M-lh-30}
+    else{T("F2",8.5,M,H-28,"Urgences et problèmes — "+dstr+" (suite)","0.45 0.45 0.45");y=H-48}}
+  function table(title,cols,rows,empty){
+    if(y<M+110)newPage();
+    T("F1",12,M,y,title,red);y-=7;L(M,y,W-M,y,red,0.8);y-=16;
+    if(!rows.length){T("F2",10,M,y,empty,"0.4 0.4 0.4");y-=26;return}
+    var TW=W-2*M,fx=cols.reduce(function(a,c){return a+(c.w||0)},0),cw=cols.map(function(c){return c.w||TW-fx}),cx=[],acc=M;cw.forEach(function(w,i){cx[i]=acc;acc+=w});
+    function head(){Rc(M,y-6,TW,19,navy);cols.forEach(function(c,i){T("F1",8.5,cx[i]+4,y,c.t,"1 1 1")});y-=21}
+    head();
+    rows.forEach(function(r,ri){
+      var L2=r.map(function(v,i){return pdfWrap(v==null||v===""?"–":String(v),9,cw[i]-8,i===cols.length-1||i===1)});
+      var nl=Math.max.apply(null,L2.map(function(x){return x.length})),h=nl*11.5+7;
+      if(y-h<M+24){newPage();head()}
+      if(ri%2)Rc(M,y-h+9,TW,h,"0.958 0.97 0.972");
+      L2.forEach(function(ls,i){var bold=i===1,col=i===cols.length-1?red:"0.08 0.08 0.08";ls.forEach(function(t,li){T(bold||i===cols.length-1?"F1":"F2",9,cx[i]+4,y-li*11.5,t,col)})});
+      L(M,y-h+9,W-M,y-h+9);y-=h;
+    });
+    y-=18;
+  }
+  newPage();
+  var urg=DEP.filter(function(i){return i.urgence==="urgente"}).sort(function(a,b){return String(a.date||"9").localeCompare(String(b.date||"9"))});
+  table("Dépannages urgents ("+urg.length+")",[{t:"Réf.",w:50},{t:"Client",w:100},{t:"Lieu",w:105},{t:"Téléphone",w:72},{t:"Type · prévu",w:78},{t:"Description"}],
+    urg.map(function(i){return[i.ref||"",i.client||"",[i.adresse,i.commune].filter(Boolean).join(", "),i.telClient||"",[i.type,i.date?"le "+fd(i.date):"",i.statut==="wip"?"(en cours)":""].filter(Boolean).join(" · "),i.description||""]}),
+    "Aucun dépannage urgent.");
+  var pb=Object.keys(C).map(function(id){return C[id]}).filter(function(c){return!c.archive&&(c.forageStatut==="probleme"||c.raccStatut==="probleme")}).sort(function(a,b){return String(a.client).localeCompare(String(b.client),"fr")});
+  table("Chantiers en problème ("+pb.length+")",[{t:"Étape",w:62},{t:"Client",w:105},{t:"Commune",w:80},{t:"Téléphone",w:72},{t:"Depuis",w:56},{t:"Problème"}],
+    pb.map(function(c){var w=c.forageStatut==="probleme"?"Forage":((c.type==="Forage eau"&&c.pompage)?"Pompage":"Raccordement");return[w,c.client||"",[c.commune,c.dept?"("+c.dept+")":""].filter(Boolean).join(" "),c.telephone||"",c.problemeDate||"",(c.problemeNote&&String(c.problemeNote).trim())||"Problème sans précision"]}),
+    "Aucun chantier en problème.");
+  pages.push(ops);
+  var n=pages.length;
+  var contents=pages.map(function(op,i){op.push("0.5 0.5 0.5 rg");op.push("BT /F2 7.5 Tf "+M+" 22 Td ("+pdfS("Hydreau Forage")+") Tj ET");op.push("BT /F2 7.5 Tf "+(W-M-40)+" 22 Td ("+pdfS("Page "+(i+1)+"/"+n)+") Tj ET");return op.join("\n")});
+  var blob=pdfAssemble(contents,W,H),a=document.createElement("a");a.href=URL.createObjectURL(blob);a.download="Urgences et problèmes - "+now.toLocaleDateString("fr-FR").replace(/\//g,"-")+".pdf";document.body.appendChild(a);a.click();setTimeout(function(){URL.revokeObjectURL(a.href);a.remove()},2000);
+}
 function cmdPdf(o){
   var W=595,H=842,M=42,pages=[],ops,y;
   var navy="0.059 0.231 0.290",teal="0.051 0.561 0.514";
@@ -946,23 +1011,7 @@ function cmdPdf(o){
   pages.push(ops);
   var n=pages.length;
   var contents=pages.map(function(op,i){op.push("BT /F2 7.5 Tf "+M+" 24 Td ("+pdfS((o.us&&o.us.nom)||"Hydreau Forage")+") Tj ET");op.push("BT /F2 7.5 Tf "+(W-M-40)+" 24 Td ("+pdfS("Page "+(i+1)+"/"+n)+") Tj ET");return op.join("\n")});
-  // assemblage
-  var img=atob(LOGO_JPG),objs=[],kids=[];
-  objs.push("<< /Type /Catalog /Pages 2 0 R >>");
-  for(var p=0;p<n;p++)kids.push((3+p*2)+" 0 R");
-  objs.push("<< /Type /Pages /Kids ["+kids.join(" ")+"] /Count "+n+" >>");
-  var f1=3+n*2,f2=f1+1,im=f2+1;
-  contents.forEach(function(c){objs.push("<< /Type /Page /Parent 2 0 R /MediaBox [0 0 "+W+" "+H+"] /Resources << /Font << /F1 "+f1+" 0 R /F2 "+f2+" 0 R >> /XObject << /Im1 "+im+" 0 R >> >> /Contents "+(objs.length+2)+" 0 R >>");objs.push("<< /Length "+c.length+" >>\nstream\n"+c+"\nendstream")});
-  objs.push("<< /Type /Font /Subtype /Type1 /BaseFont /Helvetica-Bold /Encoding /WinAnsiEncoding >>");
-  objs.push("<< /Type /Font /Subtype /Type1 /BaseFont /Helvetica /Encoding /WinAnsiEncoding >>");
-  objs.push("<< /Type /XObject /Subtype /Image /Width 284 /Height 201 /ColorSpace /DeviceRGB /BitsPerComponent 8 /Filter /DCTDecode /Length "+img.length+" >>\nstream\n"+img+"\nendstream");
-  var pdf="%PDF-1.4\n%\xE2\xE3\xCF\xD3\n",off=[0];
-  objs.forEach(function(ob,i){off.push(pdf.length);pdf+=(i+1)+" 0 obj\n"+ob+"\nendobj\n"});
-  var xs=pdf.length,x="xref\n0 "+(objs.length+1)+"\n0000000000 65535 f \n";
-  for(var j=1;j<=objs.length;j++)x+=String(off[j]).padStart(10,"0")+" 00000 n \n";
-  pdf+=x+"trailer\n<< /Size "+(objs.length+1)+" /Root 1 0 R >>\nstartxref\n"+xs+"\n%%EOF";
-  var bytes=new Uint8Array(pdf.length);for(var k=0;k<pdf.length;k++)bytes[k]=pdf.charCodeAt(k)&255;
-  return new Blob([bytes],{type:"application/pdf"});
+  return pdfAssemble(contents,W,H);
 }
 
 /* ---- interface ---- */
